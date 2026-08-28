@@ -1,0 +1,67 @@
+{
+  "summary": "First-finish latency test. Backend: all 7 endpoint groups PASS (200s, correct schemas, 12 seeded opps, filters work, stats correct, saved CRUD idempotent, report + preferences persist, 404 on unknown id). Frontend: Home renders (hero, live pulse, cards), universal search navigates to /discover with query params, Discover filters work and counts update (2 for Digital, gauteng chip applied), save toggles and header badge shows '1' (visible in screenshot), Opportunity Detail renders with AI Match panel and sections, Saved page persists the saved item, Command Palette opens with '/' key, Business & Tenders page loads. Two Radix DialogContent a11y warnings (missing DialogTitle) — non-blocking. Several spec features missing on Opportunity Detail: Apply button and Report suspicious dialog trigger not found; and a few testids that were expected in the request are absent, which weakens automated coverage.",
+  "tested_scope": ["backend", "frontend", "integration"],
+  "passed": [
+    "GET /api/opportunities returns 12 with expected schema",
+    "GET /api/opportunities filters: category=tender(1), province=Gauteng(6), remote=true(2), featured=true(6), q=Digital(2)",
+    "GET /api/opportunities/stats returns {total:12, closing_this_week:12, by_category, provinces_covered:5}",
+    "GET /api/opportunities/opp-001 returns opportunity; GET /api/opportunities/nonexistent-id returns 404",
+    "POST /api/saved + GET /api/saved/{device} + DELETE /api/saved/{device}/{id} (idempotent, list empties after delete)",
+    "POST /api/report returns {ok:true, id}",
+    "POST /api/preferences upserts; GET /api/preferences/{device} returns saved prefs",
+    "Home page: hero-search-input, live-pulse, opportunity cards render",
+    "Universal search: typing 'Digital' + Search navigates to /discover?q=Digital and shows 2 filtered cards",
+    "Discover: province chip 'Gauteng' filter updates results",
+    "Save action: header saved-count badge visible ('1') after clicking save",
+    "Opportunity Detail (/opportunity/opp-005): breadcrumb, title, org avatar, deadline badge, AI Match panel with progress bar, Overview/Requirements/Responsibilities sections",
+    "Saved page shows saved item",
+    "Command Palette opens with '/' key"
+  ],
+  "failed": [
+    {
+      "area": "Frontend / OpportunityDetail",
+      "issue": "Apply button not present in sticky action panel — spec expects Apply/Save/Share. Only 'Saved' and 'Share' rendered.",
+      "evidence": "await page.query_selector('[data-testid=\"detail-apply-button\"]') => None; detail screenshot shows action panel with only Saved + Share buttons.",
+      "priority": "HIGH"
+    },
+    {
+      "area": "Frontend / OpportunityDetail",
+      "issue": "Report suspicious opportunity dialog trigger not found on detail page — cannot invoke report flow from UI (though backend /api/report works).",
+      "evidence": "await page.query_selector('[data-testid=\"report-open-button\"]') => None; no visible Report CTA in detail action panel screenshot.",
+      "priority": "HIGH"
+    },
+    {
+      "area": "Frontend / Home",
+      "issue": "Quick-filter chips visible (No Experience/Remote/Closing Soon/Learnerships/Government/Tenders) but data-testid prefix 'quick-filter-' not present, so review-required testids missing.",
+      "evidence": "await page.query_selector_all('[data-testid^=\"quick-filter-\"]') => 0, yet chips render in screenshot.",
+      "priority": "MEDIUM"
+    },
+    {
+      "area": "Frontend / BusinessTenders",
+      "issue": "Tab testids 'bt-tab-*' not found; tabs may exist under different testids or not present.",
+      "evidence": "await page.query_selector_all('[data-testid^=\"bt-tab-\"]') => 0.",
+      "priority": "MEDIUM"
+    },
+    {
+      "area": "Frontend / Header",
+      "issue": "Header saved count badge visible in UI but data-testid 'header-saved-count' not attached (badge shows '1' after save but testid lookup returns None).",
+      "evidence": "await page.query_selector('[data-testid=\"header-saved-count\"]') => None; badge visible in detail screenshot.",
+      "priority": "LOW"
+    },
+    {
+      "area": "Accessibility",
+      "issue": "Radix DialogContent warning: missing DialogTitle (2 console errors).",
+      "evidence": "CONSOLE:error: `DialogContent` requires a `DialogTitle` for the component to be accessible for screen reader users.",
+      "priority": "LOW"
+    }
+  ],
+  "action_items": [
+    "Add Apply button (with data-testid='detail-apply-button') to Opportunity Detail sticky action panel (and mobile action bar) linking to source URL.",
+    "Expose Report suspicious opportunity trigger on Opportunity Detail (data-testid='report-open-button') and wire the existing Dialog (reason chips, details, contact, submit).",
+    "Add missing data-testids: quick-filter-{key} on Home chips, header-saved-count on header badge, bt-tab-{tenders|rfqs|funding} on Business & Tenders tabs — improves testability.",
+    "Fix Radix Dialog a11y: add DialogTitle (or VisuallyHidden wrapper) inside DialogContent components (likely CommandPalette and Report dialogs)."
+  ],
+  "success_rate": {"backend": "100%", "frontend": "~78%"},
+  "retest_needed": true,
+  "full_testing_deferred": true
+}

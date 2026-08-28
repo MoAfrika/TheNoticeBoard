@@ -1,0 +1,106 @@
+{
+  "project_title": "The Notice Board — South Africa's Intelligent Opportunity Operating System",
+  "positioning": "Editorial-premium South African opportunity discovery platform combining high-trust verification, national opportunity intelligence, and sophisticated editorial styling.",
+  "design_philosophy": {
+    "core_archetype": "Swiss Editorial & High-Trust Data Architecture",
+    "principles": [
+      "Fusion over Imitation: Combine Financial Times authority with Stripe product polish and Linear density",
+      "Emotion First: Evoke career empowerment, security, and national progress without cheap AI slop",
+      "Content is King: Newspaper-grade hierarchy with high readability and structured data transparency",
+      "Trust Architecture: Transparent verification scores, official source auditing, and scam protection badges"
+    ]
+  },
+  "typography": {
+    "font_family_display": "'Playfair Display', 'Cormorant Garamond', Georgia, serif",
+    "font_family_sans": "'Plus Jakarta Sans', 'General Sans', -apple-system, sans-serif",
+    "font_family_mono": "'JetBrains Mono', monospace",
+    "type_scale": {
+      "h1_hero": "text-4xl sm:text-5xl lg:text-6xl font-serif tracking-tight leading-[1.15]",
+      "h2_section": "text-2xl sm:text-3xl lg:text-4xl font-serif font-bold text-slate-900 dark:text-slate-100 tracking-tight",
+      "h3_card": "text-lg sm:text-xl font-sans font-semibold text-slate-900 dark:text-slate-100 leading-snug",
+      "body": "text-base sm:text-sm font-sans text-slate-600 dark:text-slate-300 leading-relaxed",
+      "badge_overline": "text-xs uppercase tracking-widest font-mono font-medium"
+    }
+  },
+  "colors": {
+    "theme": "Light warm off-white default with rich midnight blue branding + dark mode toggle",
+    "primary": "#0A2540",
+    "primary_hover": "#113459",
+    "accent_gold": "#C59B27",
+    "background_page": "#FAF9F6",
+    "background_card": "#FFFFFF",
+    "text_primary": "#0D131F",
+    "text_muted": "#4A5568",
+    "border_subtle": "#E2E8F0",
+    "semantic_status": {
+      "verified": {
+        "bg": "bg-emerald-50 dark:bg-emerald-950/40",
+        "text": "text-emerald-700 dark:text-emerald-300",
+        "border": "border-emerald-200 dark:border-emerald-800"
+      },
+      "closing_today": {
+        "bg": "bg-rose-50 dark:bg-rose-950/40",
+        "text": "text-rose-700 dark:text-rose-300",
+        "border": "border-rose-200 dark:border-rose-800 animate-pulse"
+      },
+      "closing_soon": {
+        "bg": "bg-amber-50 dark:bg-amber-950/40",
+        "text": "text-amber-700 dark:text-amber-300",
+        "border": "border-amber-200 dark:border-amber-800"
+      },
+      "government": {
+        "bg": "bg-indigo-50 dark:bg-indigo-950/40",
+        "text": "text-indigo-700 dark:text-indigo-300",
+        "border": "border-indigo-200 dark:border-indigo-800"
+      },
+      "tender": {
+        "bg": "bg-cyan-50 dark:bg-cyan-950/40",
+        "text": "text-cyan-800 dark:text-cyan-300",
+        "border": "border-cyan-200 dark:border-cyan-800"
+      },
+      "bursary": {
+        "bg": "bg-purple-50 dark:bg-purple-950/40",
+        "text": "text-purple-700 dark:text-purple-300",
+        "border": "border-purple-200 dark:border-purple-800"
+      },
+      "learnership": {
+        "bg": "bg-teal-50 dark:bg-teal-950/40",
+        "text": "text-teal-800 dark:text-teal-300",
+        "border": "border-teal-200 dark:border-teal-800"
+      }
+    }
+  },
+  "spacing_and_layout": {
+    "container_padding": "px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto",
+    "card_padding": "p-5 sm:p-6 lg:p-8",
+    "grid_bento": "grid grid-cols-1 md:grid-cols-8 lg:grid-cols-12 gap-6"
+  },
+  "image_urls": {
+    "hero_skyline": "https://images.unsplash.com/photo-1698744715459-05b380993dc0?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA2MTJ8MHwxfHNlYXJjaHxfMTc4Nzg0MjMzMXww&ixlib=rb-4.1.0&q=85",
+    "city_view": "https://images.unsplash.com/photo-1552937075-967cf58b74a4?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Njl8MHwxfHNlYXJjaHwxfHxjb3Jwb3JhdGUlMjBvZmZpY2UlMjB0ZWFtJTIwU291dGglMjBBZnJpY2ElMjBkaXZlcnNpdHklMjBwcm9mZXNzaW9uYWx8ZW58MHx8fHwxNzg3ODIyMzQzfDA&ixlib=rb-4.1.0&q=85",
+    "professional_worker_1": "https://images.unsplash.com/photo-1541178735493-479c1a27ed24?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NjZ8MHwxfHNlYXJjaHwxfHx5b3VuZyUyMGFmcmljYW4lMjBwcm9mZXNzaW9uYWwlMjB3b3Jrc3BhY2UlMjBsYXB0b3AlMjBlZHVjYXRpb258ZW58MHx8fHwxNzg3ODIyMzQzfDA&ixlib=rb-4.1.0&q=85",
+    "professional_worker_2": "https://images.unsplash.com/photo-1612299273045-362a39972259?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NjZ8MHwxfHNlYXJjaHwyfHx5b3VuZyUyMGFmcmljYW4lMjBwcm9mZXNzaW9uYWwlMjB3b3Jrc3BhY2UlMjBsYXB0b3AlMjBlZHVjYXRpb258ZW58MHx8fHwxNzg3ODIyMzQzfDA&ixlib=rb-4.1.0&q=85",
+    "professional_worker_3": "https://images.unsplash.com/photo-1622295023825-6e319464b810?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NjZ8MHwxfHNlYXJjaHw0fHx5b3VuZyUyMGFmcmljYW4lMjBwcm9mZXNzaW9uYWwlMjB3b3Jrc3BhY2UlMjBsYXB0b3AlMjBlZHVjYXRpb258ZW58MHx8fHwxNzg3ODIyMzQzfDA&ixlib=rb-4.1.0&q=85",
+    "professional_worker_4": "https://images.unsplash.com/photo-1726690330713-18c0c0efbdc0?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NjZ8MHwxfHNlYXJjaHwzfHx5b3VuZyUyMGFmcmljYW4lMjBwcm9mZXNzaW9uYWwlMjB3b3Jrc3BhY2UlMjBsYXB0b3AlMjBlZHVjYXRpb258ZW58MHx8fHwxNzg3ODIyMzQzfDA&ixlib=rb-4.1.0&q=85"
+  },
+  "required_screens_and_components": [
+    "Mega Navigation Bar with dark logo badge, category shortcuts, search input, and high-trust status counter",
+    "Mobile Bottom Navigation Bar with quick access to Home, Search, Saved, Tenders, and Alerts",
+    "Cinematic Hero with Live Opportunity Pulse (counter for active jobs, learnerships, tenders)",
+    "Universal Search Bar with Province filter, Opportunity Category selector, and Remote toggle",
+    "Discover by Goal Pathways (Entry Level / Youth, Skilled Professional, Enterprise Tender, Bursary)",
+    "Closing Soon Urgency Ticker with dynamic countdown badges",
+    "Opportunity Feed with slide-over/sticky filter rail and layout mode toggle (Grid/List)",
+    "Opportunity Card Variants (Job, Learnership, Bursary, Tender/RFQ with reference code & budget, Business)",
+    "Opportunity Detail Page with sticky action drawer, verification meter, requirement checklist, AI match stub, and report scam modal",
+    "Business & Tenders Portal with procurement category filters and compliance badge highlights",
+    "Saved Workspace with custom folder organization (Applied, Interested, Shortlisted) and localStorage sync",
+    "Preferences & WhatsApp Alert Settings Modal/Page",
+    "Trust & Safety Centre with verification process breakdown and scam report wizard",
+    "Global Command Palette (⌘K) for quick keyboard-driven navigation across all categories and provinces",
+    "AI Feature Stubs: AI Match Score badge (e.g., 94% Match), Key Requirements Summary Pill, and Smart Next-Steps widget"
+  ],
+  "testing_attributes": {
+    "rule": "All interactive buttons, inputs, links, tabs, cards, and modals MUST include explicit data-testid attributes in lower-kebab-case."
+  }
+}
