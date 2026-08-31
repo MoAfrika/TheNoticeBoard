@@ -1,0 +1,86 @@
+{
+  "summary": "Tested Feb-2026 iteration (OG share previews, daily WhatsApp digest, real social links) + full regression. Backend: 15/18 pytest passed (83%). All 3 failures share ONE root cause: GET /share/{id} is NOT reachable through the public ingress (only /api/* is proxied to backend:8001) — the entire public share-preview feature is broken end-to-end. OG image generation (/api/og/{id}.png), digest generation/idempotency, cron auth and all frontend flows (digest page, links, mobile nav, detail share, regression) pass.",
+  "backend_issues": {
+    "critical": [
+      {
+        "endpoint": "GET /share/{opp_id}",
+        "issue": "Route is defined on the FastAPI app WITHOUT the /api prefix, so the k8s ingress serves it from the frontend (port 3000) instead of the backend. Public GET https://<host>/share/opp-005 returns 200 with the generic React index.html (site-wide og:title only, NO per-opportunity og:image/og:url) and /share/nonexistent-id returns 200 instead of 404. Works only on http://localhost:8001/share/opp-001. Consequence: every WhatsApp/Facebook link produced by the app renders a generic card, and a recipient clicking it lands on a BLANK page (header+footer only, no /share route and no catch-all in App.js) — no redirect to /opportunity/{id}. Fix: move the route to /api/share/{opp_id} (like /api/og) and update OpportunityDetail.jsx share()/shareWhatsApp() accordingly, OR add a /share/:id SPA route that redirects.",
+        "priority": "CRITICAL"
+      },
+      {
+        "endpoint": "GET /share/{opp_id} (og.py render_share_html)",
+        "issue": "og:image / twitter:image are built from request.base_url, which behind the ingress/uvicorn resolves to 'http://localhost:8001/api/og/{id}.png'. Verified: internal response contains og:image content=\"http://localhost:8001/api/og/opp-001.png\". Social crawlers cannot fetch that, so the preview image will never render even after the routing fix. Use the configured public BACKEND_URL/FRONTEND_URL env value (https) instead of request.base_url.",
+        "priority": "HIGH"
+      }
+    ],
+    "minor": [
+      {
+        "endpoint": "GET /api/digest/{device_id}",
+        "issue": "Returns the most recent digest for the device regardless of date (sort by generated_at only, no date filter). If a user visits after not visiting for days, they get a stale digest with expired opportunities instead of today's. Suggest querying {device_id, date: today} and generating on-demand when absent."
+      },
+      {
+        "endpoint": "GET /api/opportunities (BACKEND_URL default)",
+        "issue": "server.py hardcodes the preview hostname as the default for FRONTEND_URL/BACKEND_URL (os.environ.get('FRONTEND_URL', 'https://notice-board-17.preview.emergentagent.com')). Env defaults should be omitted so misconfiguration fails fast; this will silently break in production."
+      },
+      {
+        "endpoint": "GET /api/og/{id}.png",
+        "issue": "App sets 'Cache-Control: public, max-age=3600' but the preview ingress overwrites it with 'no-store, no-cache'. Infra behaviour, not an app defect — noted only so it isn't chased later. Assertion removed from the test suite."
+      }
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "App.js routing / share landing",
+        "issue": "No /share/:id SPA route and no catch-all NotFound route — https://<host>/share/opp-005 renders an empty content area between header and footer (verified via screenshot). Any user who clicks a shared link sees a blank page.",
+        "selector": "/share/opp-005",
+        "priority": "CRITICAL"
+      },
+      {
+        "component": "Preferences.jsx",
+        "issue": "'See today's digest' uses <a href=\"/digest\"> instead of react-router <Link>, forcing a full page reload (works, but loses SPA state).",
+        "selector": "[data-testid=\"pref-view-digest\"]",
+        "priority": "LOW"
+      }
+    ],
+    "integration_issues": [
+      {
+        "flow": "Opportunity Detail -> Share / Send via WhatsApp",
+        "issue": "Both correctly build ${REACT_APP_BACKEND_URL}/share/{id} and the toast 'Share link copied' fires, but the copied/shared URL is non-functional publicly (see backend CRITICAL #1). The share feature is therefore end-to-end broken despite the UI working.",
+        "affected_selectors": ["[data-testid=\"detail-share-button\"]", "[data-testid=\"side-share-whatsapp\"]", "[data-testid=\"mobile-share\"]"]
+      }
+    ],
+    "design_issues": [
+      {
+        "screen": "Home — community section (dark navy card)",
+        "issues": ["'Chat with a human' ghost button renders muted grey text on the dark navy panel with a barely-visible fill — noticeably lower contrast than the two sibling CTAs; looks disabled. Give it the same outlined/light treatment as 'Follow public page'."]
+      }
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/backend_test.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [
+    "CRITICAL: Re-route the share page under /api (e.g. GET /api/share/{opp_id}) so the ingress proxies it to the backend, and update OpportunityDetail.jsx share()/shareWhatsApp() to use the new path. Verify GET <public>/api/share/nonexistent-id returns 404.",
+    "HIGH: In og.py render_share_html, build og:image/twitter:image from the configured public BACKEND_URL env value, not request.base_url (currently emits http://localhost:8001/...).",
+    "MEDIUM: Add a /share/:id SPA route (redirect to /opportunity/:id) plus a catch-all 404 route so shared links never land on a blank page.",
+    "MEDIUM: Filter GET /api/digest/{device_id} by today's date so users never receive a stale digest.",
+    "LOW: Remove hardcoded preview-host defaults for FRONTEND_URL/BACKEND_URL in server.py.",
+    "LOW: Use <Link> for pref-view-digest; raise contrast of the 'Chat with a human' CTA."
+  ],
+  "critical_code_review_comments": [
+    "server.py: any route that must be reachable publicly MUST live under the /api prefix in this environment — /share/{opp_id} silently falls through to the frontend, which is why it 'worked' in the manual localhost smoke test.",
+    "og.py: request.base_url is unreliable behind a reverse proxy; derive absolute asset URLs from env config.",
+    "digest.py compute_digest_for_prefs takes an unused `db` argument — dead parameter.",
+    "_run_digest_job correctly guards on {device_id, date} before insert, so cron is idempotent per day (verified), but there is no unique index on (device_id, date) — two concurrent cron runs could still race. Consider a unique compound index."
+  ],
+  "updated_files": ["/app/backend/tests/backend_test.py"],
+  "success_rate": {"backend": "83%", "frontend": "94%"},
+  "seed_data_creation": "Created several TEST_<uuid> device_ids in the preferences + digests collections via API, and one TEST_ report on opp-005. No seeded opportunity data modified.",
+  "should_call_test_agent_after_fix": true,
+  "should_main_agent_self_test": false,
+  "test_credentials": "None required — public app; device_id from localStorage (tnb.deviceId).",
+  "context_for_next_testing_agent": "Backend suite is /app/backend/tests/backend_test.py (18 tests, pytest, uses REACT_APP_BACKEND_URL from /app/frontend/.env and WEBHOOK_CRON_SECRET from /app/backend/.env). Currently only the 3 TestSharePage tests fail, all from the /share routing bug — after the fix, update BASE_URL path in TestSharePage to the new /api/share/{id} and re-run; they should all pass. VERIFIED PASSING: OG PNG for all 12 opportunities (200, image/png, ~52KB, visually correct Playfair card), OG 404, digest on-demand generation with no prefs (6 picks, wa.me/?text= link, '*The Notice Board — Daily Digest*' header), digest respects category prefs (top pick category==bursary with reason), expired opportunities excluded, cron 401 without/with wrong secret, cron 200 in <1s and idempotent per (device_id, date) across two runs. FRONTEND VERIFIED: /digest renders 6 picks with match scores + deadline chips + reasons; digest-share-btn opens wa.me with full digest text; digest-refresh-btn; digest-preferences-btn -> /preferences; pref-view-digest -> /digest; header-join-cta + footer-whatsapp + cta-whatsapp-community -> chat.whatsapp.com/KjAVSuv2mTg0yo3TMdIeAn; footer-facebook + cta-facebook-page -> web.facebook.com/thenoticeboardpage; cta-whatsapp-help -> wa.me/27682337028 (note: wa.me and facebook.com issue 3xx redirects to api.whatsapp.com/send and facebook login — assert on the redirect target, not equality); header bell -> /digest; bottom-nav-digest present (no bottom-nav-alerts) and routes to /digest on 390px. REGRESSION ALL PASS: discover 12 cards + search 'bursary' -> 1 + filter-cat-tender -> 1 + clear-filters -> 12, card save-btn -> saved page shows the card, business-tenders 3 tabs, Ctrl+K command palette with results, detail Apply link + report dialog submit (reason testids are report-reason-suspected-scam etc.). Correct card testids: opportunity-card-{id}, tender-card-{id}.",
+  "rca_of_the_issue": "Kubernetes ingress in this environment routes only /api/* to the backend (port 8001); every other path goes to the React dev server (port 3000). GET /share/{opp_id} was registered on the FastAPI app without the /api prefix, so it is never reached from the public URL — the SPA's index.html is returned instead (200 for any id, generic OG tags). Reproduce: curl -s https://<public>/share/opp-001 | grep og:image -> only the site-wide tags; curl http://localhost:8001/share/opp-001 -> correct per-opportunity HTML. Secondary defect surfaced by the same check: the backend-generated HTML sets og:image from request.base_url, yielding http://localhost:8001/api/og/opp-001.png. Mitigation: expose the share page as /api/share/{opp_id}, build absolute image URLs from an env-configured public base URL, and add a /share/:id SPA fallback route."
+}

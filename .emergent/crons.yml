@@ -1,0 +1,17 @@
+crons:
+  - name: daily-digest-sa
+    description: "Generates each user's personalised daily opportunity digest at 07:00 SAST"
+    cron: "0 5 * * *"
+    timezone: "Africa/Johannesburg"
+    endpoint: "{{BASE_URL}}/api/cron/digest"
+    method: POST
+    # Cron endpoints must ack 2xx immediately; enqueue/background the actual work.
+    enabled: true
+  - name: scrape-sources
+    description: "Scrapes eTenders + registered sources every 6 hours; upserts verified opportunities"
+    cron: "0 */6 * * *"
+    timezone: "Africa/Johannesburg"
+    endpoint: "{{BASE_URL}}/api/cron/scrape"
+    method: POST
+    # Cron endpoints must ack 2xx immediately; enqueue/background the actual work.
+    enabled: true

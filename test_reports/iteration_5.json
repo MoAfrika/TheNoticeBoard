@@ -1,0 +1,45 @@
+{
+  "summary": "Iteration 5 full-stack test of the scraping architecture, /api/sources transparency page, and the public-submission → admin-approval flow. Backend: 43 pytest cases (new /app/backend/tests/test_iteration5.py + regression backend_test.py) — 41 passed, 2 failed (both the same root cause: source_scraper is stripped from API responses). Verified /api/sources (15 sources, etenders live+ok with 10-13 items, 14 placeholders pending), legacy 'opp-0*' demo data fully purged (opp-001/006/012 → 404), only etenders-prefixed official items + admin-approved community items served, category filters, cron/scrape + admin/scrape-now auth (401 without / 200 with WEBHOOK_CRON_SECRET, no secret leakage in error bodies), public POST /api/submissions (no auth, status=pending, all fields echoed), admin verify/list/approve/reject with ADMIN_SECRET (401 unauth, 400 on non-pending, 404 unknown id, approve creates community + admin-reviewed opportunity, reject publishes nothing). Frontend: /sources renders all 15 rows with correct stats (1/1 live, 14 planned) + eTenders 'Live' badge + Official page link; Header 'Sources' nav works; Footer 'Submit an Opportunity' → /submit; /submit validation toast + successful POST + Thank-you screen; /admin wrong key → 'Invalid admin key' toast, correct key lists pending, token persists in localStorage across reload, approve removes from pending and item appears on /discover, reject removes without publishing, tabs work, sign-out clears token. Regression (Home, Discover 15 items + tender filter 11, Business & Tenders 11 live tenders, Opportunity detail with Official Source badge, Saved, Preferences, Digest, Command Palette, /api/share/{id} + /api/og/{id}.png) all passed with zero console errors.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "GET /api/opportunities, GET /api/opportunities/{id}", "issue": "source_scraper (and submission_id) are persisted in Mongo but stripped from responses because the Opportunity Pydantic response_model has no such field (extra='ignore'). Spec requires clients to see source_scraper='etenders' / 'community-submission'; the frontend therefore cannot show per-source provenance. 2 test failures trace to this."},
+      {"endpoint": "scrapers/etenders.py", "issue": "Scraped row parsing is thin: closing_date resolves to today's date for ALL 11 rows (so every tender renders 'Closing today' and the whole feed will look expired tomorrow / be dropped by digest expiry filter), posted_date is empty, reference_number is None for all rows, description == title, province always 'Nationwide' and organisation always 'South African Government' (organ-of-state/province/ref not extracted from the expandable row)."},
+      {"endpoint": "scrapers/__init__.py run_all", "issue": "Upsert-only pipeline: nothing removes/deactivates listings that have closed or disappeared from the source, so the feed monotonically accumulates (10 → 13 items across three runs during this test). Also, with reference_number always None the dedup key falls back to title only, so two distinct tenders with the same title would collapse into one document."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "Discover / OpportunityCard", "issue": "Admin-approved community opportunities (source_type='community', verification_status='admin-reviewed') render with no provenance/verified badge on the card — only the category and 'Open' pill. Users cannot distinguish official-scraped from community-reviewed listings in the feed.", "selector": "article (opportunity card)", "priority": "MEDIUM"},
+      {"component": "Footer", "issue": "'Submit an Opportunity' uses a raw <a href=\"/submit\"> (with external-link icon) instead of react-router <Link>, causing a full page reload and misleading external-link affordance. Route does work.", "selector": "[data-testid=\"footer-submit\"]", "priority": "LOW"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Header (desktop 1920px)", "issues": ["After adding the 'Sources' item the nav is crowded: 'Business & Tenders' and 'Trust & Safety' wrap onto two lines (56px tall) while 'Discover'/'Sources' stay single-line, and the search box label 'Search opportunities…' also wraps — baseline misalignment across the nav row."]},
+      {"screen": "Business & Tenders / Discover", "issues": ["All 11 scraped tenders show a red 'Closing today' pill (consequence of the closing_date parsing bug) which reads as an urgency error to users.", "Card body text duplicates the title verbatim because description == title for scraped rows."]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_iteration5.py", "/app/backend/tests/backend_test.py", "/app/test_reports/pytest/pytest_results.xml"],
+  "action_items": [
+    "Expose source_scraper (and optionally submission_id) on the Opportunity model so /api/opportunities responses carry provenance — currently silently dropped by the response_model.",
+    "Fix eTenders closing_date/posted_date parsing (all rows currently get today's date) and extract reference_number, organ of state and province from the expandable DataTable row; use the tender detail text for description.",
+    "Add expiry/cleanup to run_all so closed or delisted tenders leave the feed, and strengthen the dedup key now that reference_number is always None.",
+    "Show a provenance badge (COMMUNITY / ADMIN-REVIEWED vs OFFICIAL) on opportunity cards for approved submissions.",
+    "Tidy the desktop header nav so items don't wrap after the new 'Sources' link; make the footer submit link a react-router <Link>."
+  ],
+  "critical_code_review_comments": [
+    "Opportunity response_model uses extra='ignore' — any new persisted field (source_scraper, submission_id) is invisible to clients; add explicit optional fields.",
+    "server.py approve_submission builds the opportunity dict inline instead of via the Opportunity model, so schema drift between scraped and approved items is not enforced (e.g. closing_date can be '').",
+    "POST /api/submissions has no rate limiting / spam protection on a fully public endpoint, and no URL validation on source_url/application_url.",
+    "Admin auth is a single shared bearer secret with no lockout; secrets.compare_digest is used correctly and the secret is not echoed in error bodies (verified), but consider audit logging of approve/reject actors.",
+    "Admin.jsx imports Textarea but never uses it; two stale eslint-disable directives; several react/no-unescaped-entities errors in Sources.jsx/Submit.jsx/Admin.jsx (cosmetic)."
+  ],
+  "updated_files": ["/app/backend/tests/test_iteration5.py", "/app/backend/tests/backend_test.py"],
+  "success_rate": {"backend": "95% (41/43 pytest cases)", "frontend": "100% of tested flows functional (2 cosmetic/UX issues)"},
+  "seed_data_creation": "Created and then deleted TEST_-prefixed submissions/opportunities and TEST device_ids (saved/preferences/digests) from Mongo; DB left with only the 13 real eTenders documents.",
+  "should_call_test_agent_after_fix": true,
+  "should_main_agent_self_test": false,
+  "test_credentials": "WEBHOOK_CRON_SECRET and ADMIN_SECRET read from /app/backend/.env; /app/memory/test_credentials.md is stale (still claims DB is auto-seeded with 12 mock opportunities and mentions no admin key) — please update it with the admin-key note.",
+  "context_for_next_testing_agent": "Backend suite lives in /app/backend/tests/ (backend_test.py = iterations 1-4 regression incl. share/OG/digest, test_iteration5.py = sources/scrape/submission-admin flow). Run: cd /app/backend && python -m pytest tests/ -q. The 2 known failures (test_source_scraper_field_exposed, test_community_source_scraper_exposed) assert the source_scraper API gap — they should flip to pass once the Opportunity model exposes the field. Admin UI testids: admin-token-input, admin-signin-btn, admin-tab-{pending|approved|rejected}, admin-approve-{id}, admin-reject-{id}, admin-signout; localStorage key tnb.adminToken. Sources page testids: source-row-{key}, source-link-{key}. Note every /api/admin/scrape-now call re-scrapes live eTenders and grows the collection; clean TEST_ data from db.opportunities/db.submissions after runs.",
+  "rca_of_the_issue": "source_scraper gap: the Opportunity Pydantic model (server.py line ~28) declares ConfigDict(extra='ignore') and no source_scraper field, so FastAPI's response_model serialisation drops the field that scrapers/__init__.py _stamp() and approve_submission() write to Mongo (confirmed present in Mongo via direct query). eTenders date bug: _parse_date in scrapers/etenders.py slices raw[:17] for month-name formats and the row's date columns are selected by regex over texts[3:], which currently matches no real closing-date cell — the value stored in Mongo for every one of the 11 rows is today's date (verified by direct Mongo query: distinct closing_date = ['2026-08-28'], distinct posted_date = ['']), i.e. the wrong cell is being matched — so every listing renders 'Closing today'."
+}

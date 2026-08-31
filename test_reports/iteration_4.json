@@ -1,0 +1,26 @@
+{
+  "summary": "Re-tested iteration_3 fixes. Backend: 21/21 pytest passed (100%) — /api/share/{id} now proxied publicly, returns 200 HTML with per-opportunity og:title/description/image/url + JS redirect, og:image now built from the public host (https://notice-board-17.preview.emergentagent.com/api/og/{id}.png) and is fetchable (200 image/png); /api/share/nonexistent-id -> 404; /api/og 200/404 correct; /api/digest/{device} returns today's date, is idempotent per (device_id,date), and a stale 2020-01-01 row inserted directly into MongoDB is no longer returned; /api/cron/digest 401 without/with wrong secret, 200 in <1s with the .env Bearer secret, and MongoDB digest row count for today is unchanged after a second run (no duplicates). Frontend: all tested flows pass — detail Share copies '.../api/share/opp-001' (verified via clipboard read), side WhatsApp opens wa.me/?text= containing the /api/share URL, /api/share/opp-001 opened in a browser redirects to /opportunity/opp-001 with the correct title, /digest renders 6 real picks + Send to WhatsApp (full digest text) + Refresh, pref-view-digest is a client-side react-router Link (window marker survived nav), plus regression: discover 12 cards / search 'bursary'->1 / clear->12 / filter-cat-tender->1, save toggle -> saved page, report dialog submit, business-tenders tabs, Ctrl+K command palette. No critical issues remain.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Home — community section (dark navy card)", "issues": ["Carried over from iteration_3 and NOT re-verified this run: 'Chat with a human' ghost button contrast on the dark navy panel looks disabled. Low priority."]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/backend_test.py", "/app/test_reports/pytest/pytest_results.xml"],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "OpportunityDetail.jsx: data-testid=\"detail-apply-button\" is used on two sibling conditional branches (Button asChild and the anchor fallback). Only one renders at a time so tests pass, but prefer unique testids (detail-apply-external / detail-apply-anchor).",
+    "server.py: no unique compound index on digests (device_id, date); _run_digest_job guards with a find_one before insert, so two concurrent cron runs could still race. Add a unique index.",
+    "digest.py compute_digest_for_prefs still takes an unused `db` argument — dead parameter."
+  ],
+  "updated_files": ["/app/backend/tests/backend_test.py"],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "seed_data_creation": "Several TEST_<uuid> device_ids in preferences/digests via API; one stale digest row (id TEST_stale, date 2020-01-01) inserted directly into MongoDB for the stale-digest test; one report on opp-001.",
+  "should_call_test_agent_after_fix": false,
+  "should_main_agent_self_test": true,
+  "test_credentials": "None required — public app; WEBHOOK_CRON_SECRET read from /app/backend/.env; device_id from localStorage (tnb.deviceId).",
+  "context_for_next_testing_agent": "Suite: /app/backend/tests/backend_test.py (21 tests, all pass). Added this iteration: TestDigest.test_digest_is_today, TestDigest.test_digest_stale_not_returned (writes a stale row via motor using MONGO_URL/DB_NAME from /app/backend/.env), TestCronDigest.test_cron_no_duplicate_rows_in_mongo (counts digests for today before/after 2nd cron run). TestSharePage now hits /api/share/{id} and additionally asserts og:image starts with https and contains the public BASE_URL. Correct frontend testids: discover-search (NOT discover-search-input), report-open-button (NOT detail-report-button), report-reason-suspected-scam, opportunity-card-{id}, tender-card-{id}, digest-share-btn/digest-refresh-btn, pref-view-digest, detail-share-button, side-share-whatsapp. Note: wa.me and facebook.com 3xx-redirect to api.whatsapp.com/send — assert on the redirect target.",
+  "rca_of_the_issue": "Iteration_3 CRITICAL (share route not proxied) and HIGH (og:image from request.base_url) are both resolved: the route now lives under /api/share/{opp_id} so the k8s ingress forwards it to backend:8001, and _public_base(request) derives the absolute base from x-forwarded-proto/x-forwarded-host, yielding public https og:image URLs. Digest staleness fixed by filtering on {device_id, date: today}; cron idempotency confirmed by MongoDB row count."
+}

@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { MessageCircle, Facebook, ExternalLink } from "lucide-react";
+import { LINKS } from "@/lib/links";
 
 const cols = [
   { title: "Discover", links: [
@@ -17,8 +18,10 @@ const cols = [
   ]},
   { title: "Resources", links: [
     { to: "/trust-safety", label: "Trust & Safety" },
+    { to: "/sources", label: "Sources & Verification" },
     { to: "/preferences", label: "Alerts & Preferences" },
     { to: "/saved", label: "My Workspace" },
+    { to: "/digest", label: "Daily Digest" },
   ]},
 ];
 
@@ -39,13 +42,13 @@ export default function Footer() {
               Opportunity is everywhere. Finding it should not depend on who you know. An independent, editorial platform for discovering verified opportunities across South Africa.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
-              <a data-testid="footer-whatsapp" href="https://wa.me/27682337028" target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 h-9 px-3 rounded-md border border-border bg-background text-sm hover:border-primary/40">
-                <MessageCircle className="h-4 w-4" /> WhatsApp
+              <a data-testid="footer-whatsapp" href={LINKS.whatsappCommunity} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 h-9 px-3 rounded-md border border-border bg-background text-sm hover:border-primary/40">
+                <MessageCircle className="h-4 w-4" /> WhatsApp community
               </a>
-              <a data-testid="footer-facebook" href="https://facebook.com/" target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 h-9 px-3 rounded-md border border-border bg-background text-sm hover:border-primary/40">
+              <a data-testid="footer-facebook" href={LINKS.facebook} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 h-9 px-3 rounded-md border border-border bg-background text-sm hover:border-primary/40">
                 <Facebook className="h-4 w-4" /> Facebook Page
               </a>
-              <a data-testid="footer-submit" href="mailto:hello@thenoticeboard.example" className="inline-flex items-center gap-2 h-9 px-3 rounded-md border border-border bg-background text-sm hover:border-primary/40">
+              <a data-testid="footer-submit" href="/submit" className="inline-flex items-center gap-2 h-9 px-3 rounded-md border border-border bg-background text-sm hover:border-primary/40">
                 Submit an Opportunity <ExternalLink className="h-3.5 w-3.5" />
               </a>
             </div>

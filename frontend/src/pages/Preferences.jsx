@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { Bell, Mail, MessageCircle } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Bell, Mail, MessageCircle, ArrowRight } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { CATEGORIES, PROVINCES, EXPERIENCE_LEVELS } from "@/lib/opportunities";
 import { Button } from "@/components/ui/button";
@@ -78,7 +79,8 @@ export default function Preferences() {
           </div>
         </Block>
 
-        <div className="pt-6 flex justify-end">
+        <div className="pt-6 flex flex-col-reverse sm:flex-row justify-between gap-3">
+          <Button asChild variant="outline" className="h-11" data-testid="pref-view-digest"><Link to="/digest">See today's digest <ArrowRight className="h-4 w-4 ml-1.5" /></Link></Button>
           <Button data-testid="pref-save" onClick={submit} className="h-11 px-6 bg-primary text-primary-foreground hover:bg-primary/90"><Bell className="h-4 w-4 mr-2" /> Save preferences</Button>
         </div>
       </div>

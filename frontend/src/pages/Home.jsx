@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Search, ArrowRight, MapPin, Sparkles, Shield, Zap, MessageCircle, Facebook, Compass, Briefcase, GraduationCap, Building2 } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { PROVINCES, CATEGORIES, deadlineInfo } from "@/lib/opportunities";
+import { LINKS } from "@/lib/links";
 import OpportunityCard from "@/components/opportunity/OpportunityCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -206,11 +207,11 @@ export default function Home() {
             <h2 className="mt-3 font-serif text-3xl sm:text-4xl lg:text-5xl leading-tight tracking-tight">Stay close to opportunity. Every day.</h2>
             <p className="mt-4 text-primary-foreground/80 max-w-xl">Join the WhatsApp community for daily broadcasts, get help from a real human, and never miss what's happening on the national opportunity feed.</p>
             <div className="mt-6 flex flex-wrap gap-3">
-              <Button data-testid="cta-whatsapp-community" onClick={() => window.open("https://chat.whatsapp.com/", "_blank")}
+              <Button data-testid="cta-whatsapp-community" onClick={() => window.open(LINKS.whatsappCommunity, "_blank")}
                 className="bg-background text-foreground hover:bg-background/90 h-11 px-5"><MessageCircle className="h-4 w-4 mr-2" /> Join WhatsApp community</Button>
-              <Button data-testid="cta-facebook-page" variant="outline" onClick={() => window.open("https://facebook.com/", "_blank")}
+              <Button data-testid="cta-facebook-page" variant="outline" onClick={() => window.open("https://web.facebook.com/thenoticeboardpage/", "_blank")}
                 className="bg-transparent border-primary-foreground/40 text-primary-foreground hover:bg-primary-foreground/10 h-11 px-5"><Facebook className="h-4 w-4 mr-2" /> Follow public page</Button>
-              <Button data-testid="cta-whatsapp-help" variant="outline" onClick={() => window.open("https://wa.me/27682337028", "_blank")}
+              <Button data-testid="cta-whatsapp-help" variant="outline" onClick={() => window.open(LINKS.whatsappHelp, "_blank")}
                 className="bg-transparent border-primary-foreground/40 text-primary-foreground hover:bg-primary-foreground/10 h-11 px-5">Chat with a human</Button>
             </div>
           </div>

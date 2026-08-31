@@ -2,6 +2,7 @@ import React from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { Search, Bookmark, Bell, Menu, Command, ChevronDown } from "lucide-react";
 import { useApp } from "@/context/AppContext";
+import { LINKS } from "@/lib/links";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
@@ -9,6 +10,7 @@ import { cn } from "@/lib/utils";
 const NAV = [
   { to: "/discover", label: "Discover", desc: "Jobs, learnerships, bursaries" },
   { to: "/business-tenders", label: "Business & Tenders", desc: "Tenders, RFQs, funding" },
+  { to: "/sources", label: "Sources", desc: "Where we get our data" },
   { to: "/trust-safety", label: "Trust & Safety", desc: "Verification & protection" },
 ];
 
@@ -60,11 +62,11 @@ export default function Header() {
           )}
         </Link>
 
-        <Link data-testid="header-alerts-link" to="/preferences" className="hidden sm:grid h-10 w-10 place-items-center rounded-md hover:bg-secondary" aria-label="Alerts">
+        <Link data-testid="header-alerts-link" to="/digest" className="hidden sm:grid h-10 w-10 place-items-center rounded-md hover:bg-secondary" aria-label="Digest">
           <Bell className="h-5 w-5" />
         </Link>
 
-        <Button data-testid="header-join-cta" onClick={() => window.open("https://chat.whatsapp.com/", "_blank")}
+        <Button data-testid="header-join-cta" onClick={() => window.open(LINKS.whatsappCommunity, "_blank")}
           className="hidden md:inline-flex h-10 rounded-md bg-primary hover:bg-primary/90 text-primary-foreground">
           Join Community
         </Button>
@@ -89,6 +91,7 @@ export default function Header() {
                 </Link>
               ))}
               <Link to="/saved" data-testid="mobile-nav-saved" className="py-4">Saved <span className="text-muted-foreground">({savedIds.length})</span></Link>
+              <Link to="/digest" data-testid="mobile-nav-digest" className="py-4">Daily digest</Link>
               <Link to="/preferences" data-testid="mobile-nav-preferences" className="py-4">Alerts & Preferences</Link>
             </div>
           </SheetContent>

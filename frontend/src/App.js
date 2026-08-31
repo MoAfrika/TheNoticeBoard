@@ -14,6 +14,10 @@ import OpportunityDetail from "@/pages/OpportunityDetail";
 import Saved from "@/pages/Saved";
 import Preferences from "@/pages/Preferences";
 import TrustSafety from "@/pages/TrustSafety";
+import Digest from "@/pages/Digest";
+import Sources from "@/pages/Sources";
+import Submit from "@/pages/Submit";
+import Admin from "@/pages/Admin";
 
 function Shell({ children }) {
   return (
@@ -41,6 +45,10 @@ export default function App() {
             <Route path="/saved" element={<Saved />} />
             <Route path="/preferences" element={<Preferences />} />
             <Route path="/trust-safety" element={<TrustSafety />} />
+            <Route path="/sources" element={<Sources />} />
+            <Route path="/submit" element={<Submit />} />
+            <Route path="/admin" element={<Admin />} />
+            <Route path="/digest" element={<Digest />} />
           </Routes>
         </Shell>
       </BrowserRouter>

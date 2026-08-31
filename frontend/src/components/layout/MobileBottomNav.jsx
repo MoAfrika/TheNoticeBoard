@@ -1,6 +1,6 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
-import { Home, Compass, Bookmark, Bell, Briefcase } from "lucide-react";
+import { Home, Compass, Bookmark, Sparkles, Briefcase } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const items = [
@@ -8,7 +8,7 @@ const items = [
   { to: "/discover", label: "Discover", icon: Compass, id: "discover" },
   { to: "/business-tenders", label: "Tenders", icon: Briefcase, id: "tenders" },
   { to: "/saved", label: "Saved", icon: Bookmark, id: "saved" },
-  { to: "/preferences", label: "Alerts", icon: Bell, id: "alerts" },
+  { to: "/digest", label: "Digest", icon: Sparkles, id: "digest" },
 ];
 
 export default function MobileBottomNav() {

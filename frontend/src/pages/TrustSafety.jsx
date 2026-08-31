@@ -1,5 +1,6 @@
 import React from "react";
 import { ShieldCheck, AlertTriangle, Eye, MessageCircle, Flag, CheckCircle2 } from "lucide-react";
+import { LINKS } from "@/lib/links";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
@@ -54,7 +55,7 @@ export default function TrustSafety() {
           <div className="mt-6 flex flex-wrap gap-3">
             <Button asChild data-testid="trust-report-btn" className="h-11 bg-background text-foreground hover:bg-background/90"><Link to="/discover">Browse & report suspicious listing</Link></Button>
             <Button asChild variant="outline" data-testid="trust-whatsapp-btn" className="h-11 bg-transparent border-primary-foreground/40 text-primary-foreground hover:bg-primary-foreground/10">
-              <a href="https://wa.me/27682337028" target="_blank" rel="noreferrer"><MessageCircle className="h-4 w-4 mr-2" /> Message us on WhatsApp</a>
+              <a href={LINKS.whatsappHelp} target="_blank" rel="noreferrer"><MessageCircle className="h-4 w-4 mr-2" /> Message us on WhatsApp</a>
             </Button>
           </div>
         </div>

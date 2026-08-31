@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Bookmark, Share2, Flag, MapPin, ExternalLink, ShieldCheck, Sparkles, CalendarClock, Wifi, MessageCircle, Copy, Check } from "lucide-react";
 import { useApp } from "@/context/AppContext";
+import { LINKS } from "@/lib/links";
 import { CATEGORY_META, deadlineInfo, deadlineToneClasses, relativePosted, orgInitials, orgColor } from "@/lib/opportunities";
 import OpportunityCard from "@/components/opportunity/OpportunityCard";
 import { Button } from "@/components/ui/button";
@@ -35,10 +36,16 @@ export default function OpportunityDetail() {
   const related = opportunities.filter(o => o.id !== opp.id && o.category === opp.category).slice(0, 3);
 
   const share = async () => {
-    const url = window.location.href;
+    const url = `${process.env.REACT_APP_BACKEND_URL}/api/share/${opp.id}`;
     if (navigator.share) { try { await navigator.share({ title: opp.title, url }); return; } catch {} }
-    await navigator.clipboard.writeText(url); setCopied(true); toast.success("Link copied");
+    await navigator.clipboard.writeText(url); setCopied(true); toast.success("Share link copied");
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const shareWhatsApp = () => {
+    const url = `${process.env.REACT_APP_BACKEND_URL}/api/share/${opp.id}`;
+    const text = `${opp.title} — ${opp.organisation}\n${url}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
   };
 
   return (
@@ -194,7 +201,15 @@ export default function OpportunityDetail() {
               <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Need help?</div>
               <div className="mt-2 text-sm text-muted-foreground">Chat to a real person if you need help understanding or verifying this listing.</div>
               <Button asChild variant="outline" className="mt-3 w-full h-10" data-testid="side-whatsapp">
-                <a href={`https://wa.me/27682337028?text=${encodeURIComponent(`Hi, I have a question about: ${opp.title}`)}`} target="_blank" rel="noreferrer"><MessageCircle className="h-4 w-4 mr-2" /> Chat on WhatsApp</a>
+                <a href={LINKS.whatsappHelpWithText(`Hi, I have a question about: ${opp.title}`)} target="_blank" rel="noreferrer"><MessageCircle className="h-4 w-4 mr-2" /> Chat on WhatsApp</a>
+              </Button>
+            </div>
+
+            <div className="border border-border rounded-lg bg-card p-5">
+              <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Share to WhatsApp</div>
+              <div className="mt-2 text-sm text-muted-foreground">Drop this opportunity in a WhatsApp group with a beautiful preview card.</div>
+              <Button data-testid="side-share-whatsapp" onClick={shareWhatsApp} variant="outline" className="mt-3 w-full h-10">
+                <MessageCircle className="h-4 w-4 mr-2" /> Send via WhatsApp
               </Button>
             </div>
           </div>
@@ -208,7 +223,7 @@ export default function OpportunityDetail() {
         {opp.application_url ? (
           <Button asChild data-testid="mobile-apply" className="h-11 flex-1 bg-primary text-primary-foreground"><a href={opp.application_url} target="_blank" rel="noreferrer">Apply now</a></Button>
         ) : (
-          <Button asChild data-testid="mobile-help" className="h-11 flex-1 bg-primary text-primary-foreground"><a href={`https://wa.me/27682337028`} target="_blank" rel="noreferrer">Get help</a></Button>
+          <Button asChild data-testid="mobile-help" className="h-11 flex-1 bg-primary text-primary-foreground"><a href={LINKS.whatsappHelp} target="_blank" rel="noreferrer">Get help</a></Button>
         )}
       </div>
 
